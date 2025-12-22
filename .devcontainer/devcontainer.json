@@ -1,0 +1,24 @@
+{
+  "name": "Workspace",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers-extra/features/bun:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/create.sh",
+  "postStartCommand": "bash .devcontainer/start.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "oven.bun-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true,
+        "files.watcherExclude": {
+          "**/.git/**": true,
+          "**/node_modules/**": true
+        }
+      }
+    }
+  }
+}
