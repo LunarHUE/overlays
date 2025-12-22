@@ -1,0 +1,5 @@
+{
+  "overlaysDir": "src/overlays",
+  "intentsDir": "src/intents",
+  "generatedDir": "src/generated"
+}

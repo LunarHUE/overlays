@@ -1,0 +1,23 @@
+{
+  "name": "@overlay-router/overlay-router",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./react": "./src/react/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "dev": "bun run src/cli.ts"
+  },
+  "dependencies": {
+    "@types/react": "^19.2.7",
+    "chokidar": "^3.5.3",
+    "next": "^16.1.0",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1"
+  }
+}
