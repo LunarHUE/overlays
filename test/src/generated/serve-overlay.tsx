@@ -5,15 +5,18 @@ import React, { Suspense, lazy, useMemo } from "react";
 import { useOverlayActions } from "./hooks";
 
 import ProfileEditOverlay from "../overlays/profile/edit";
+import UserCreateOverlay from "../overlays/user/create";
 
 // Map of overlay names to components
 const overlayComponents = {
   "profile/edit": ProfileEditOverlay,
+  "user/create": UserCreateOverlay,
 } as const;
 
 // Lazy-loaded versions for code splitting (optional)
 const lazyOverlayComponents = {
   "profile/edit": lazy(() => import("../overlays/profile/edit")),
+  "user/create": lazy(() => import("../overlays/user/create")),
 } as const;
 
 interface ServeOverlayProps {

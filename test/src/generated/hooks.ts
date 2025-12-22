@@ -1,87 +1,65 @@
 // THIS FILE IS AUTO-GENERATED. DO NOT EDIT.
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const STORAGE_KEY = "overlay_router_state";
+const EVENT_KEY = "overlay_router_change";
 
 /**
- * Hook to manage overlay state through URL search params
+ * Hook to manage overlay state through Session Storage
  */
 export function useOverlay() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [currentOverlay, setCurrentOverlay] = useState<{name: string, data: any} | null>(null);
 
-  const currentOverlay = useMemo(() => {
-    const overlayParam = searchParams.get("overlay");
-    if (!overlayParam) return null;
-
-    const overlayName = overlayParam.split(":")[1];
-    const dataParam = searchParams.get("data");
-
-    let data = undefined;
-    if (dataParam) {
+  useEffect(() => {
+    const checkOverlay = () => {
       try {
-        data = JSON.parse(atob(dataParam));
+        const item = sessionStorage.getItem(STORAGE_KEY);
+        if (item) {
+          setCurrentOverlay(JSON.parse(item));
+        } else {
+          setCurrentOverlay(null);
+        }
       } catch (e) {
-        console.error("Failed to parse overlay data:", e);
+        console.error("Failed to parse overlay state:", e);
+        setCurrentOverlay(null);
       }
-    }
+    };
 
-    return { name: overlayName, data };
-  }, [searchParams]);
+    checkOverlay();
+    window.addEventListener(EVENT_KEY, checkOverlay);
+    return () => window.removeEventListener(EVENT_KEY, checkOverlay);
+  }, []);
 
   const openOverlay = useCallback(
     <K extends keyof OverlayMap>(
       name: K,
-      data?: OverlayMap[K],
-      options?: { replace?: boolean }
+      data?: OverlayMap[K]
     ) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("overlay", `o:${name}`);
-
-      if (data !== undefined) {
-        // Encode data as base64 JSON
-        params.set("data", btoa(JSON.stringify(data)));
-      } else {
-        params.delete("data");
-      }
-
-      const url = `${pathname}?${params.toString()}`;
-      
-      if (options?.replace) {
-        router.replace(url);
-      } else {
-        router.push(url);
-      }
+      const state = { name, data };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      window.dispatchEvent(new Event(EVENT_KEY));
     },
-    [router, pathname, searchParams]
+    []
   );
 
-  const closeOverlay = useCallback(
-    (options?: { replace?: boolean }) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("overlay");
-      params.delete("data");
-
-      const url = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-
-      if (options?.replace) {
-        router.replace(url);
-      } else {
-        router.push(url);
-      }
-    },
-    [router, pathname, searchParams]
-  );
+  const closeOverlay = useCallback(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    window.dispatchEvent(new Event(EVENT_KEY));
+  }, []);
 
   const updateOverlayData = useCallback(
     <K extends keyof OverlayMap>(data: OverlayMap[K]) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("data", btoa(JSON.stringify(data)));
-      router.replace(`${pathname}?${params.toString()}`);
+      const item = sessionStorage.getItem(STORAGE_KEY);
+      if (item) {
+        const current = JSON.parse(item);
+        const newState = { ...current, data };
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
+        window.dispatchEvent(new Event(EVENT_KEY));
+      }
     },
-    [router, pathname, searchParams]
+    []
   );
 
   return {
