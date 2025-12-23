@@ -1,9 +1,9 @@
 {
-  "name": "overlay-router",
+  "name": "@lunarhue",
   "version": "0.1.0",
   "private": true,
   "workspaces": [
     "test",
-    "overlay-router"
+    "examples/**/*"
   ]
 }
