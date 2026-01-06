@@ -24,7 +24,7 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: cd overlays
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm publish
+      - run: bun install
+      - run: bun run build
+      - run: bun publish
 
