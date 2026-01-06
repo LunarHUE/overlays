@@ -1,49 +1,44 @@
+"use client";
+
 import React from 'react';
 import { z } from 'zod';
 import { useOverlayContext } from './use-overlay-context';
-import { defineOverlay } from '../define-overlay';
+import type { CallbackSchemas, InferCallbacks, BrandedOverlay } from '../types';
 
-type InferProps<T> = T extends { props: z.ZodType<infer P> } ? P : never;
-type InferCallbacks<T> = T extends { callbacks?: infer C } ? C : {};
-
-export function useOverlay<T extends ReturnType<typeof defineOverlay>>(
-  overlayDefinition: T,
-  overrideStorageKey?: string
+export function useOverlay<
+  TPropsSchema extends z.ZodType<any, any>,
+  TCallbackSchemas extends CallbackSchemas
+>(
+  overlayDefinition: BrandedOverlay<TPropsSchema, TCallbackSchemas>,
 ) {
   const { open, registerOverlay } = useOverlayContext();
-  const storageKey = overrideStorageKey || overlayDefinition.storageKey;
-  const id = `${storageKey}-${overlayDefinition.__type}`;
+  const id = `${overlayDefinition.__type}`;
 
   React.useEffect(() => {
-    registerOverlay(id, overlayDefinition);
+    registerOverlay(id, overlayDefinition as any);
   }, [id, overlayDefinition, registerOverlay]);
 
   const openOverlay = React.useCallback(
     (options?: {
-      props?: InferProps<T>;
-      callbacks?: Partial<InferCallbacks<T>>;
+      props?: z.infer<TPropsSchema>;
+      callbacks?: Partial<InferCallbacks<TCallbackSchemas>>;
     }) => {
       const props = overlayDefinition.validateProps(
         options?.props ?? overlayDefinition.defaultProps ?? {}
       );
 
-      const callbacks = {
-        ...overlayDefinition.callbacks,
-        ...options?.callbacks,
-      };
-
-      overlayDefinition.defaultCallbacks?.onOpen?.(props);
+      const callbacks = Object.fromEntries(
+        Object.entries(options?.callbacks ?? {}).filter(([_, v]) => v !== undefined)
+      ) as Record<string, (...args: any[]) => any>;
 
       open({
         id,
-        storageKey,
-        definition: overlayDefinition,
+        definition: overlayDefinition as any,
         props,
         callbacks,
-        usePortal: overlayDefinition.usePortal ?? false,
       });
     },
-    [overlayDefinition, open, id, storageKey]
+    [overlayDefinition, open, id]
   );
 
   return openOverlay;

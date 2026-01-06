@@ -15,6 +15,7 @@ build/
 .vercel/
 
 # Production builds
+.turbo/
 dist/
 *.local
 

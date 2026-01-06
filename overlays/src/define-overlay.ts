@@ -1,12 +1,12 @@
 import { z } from 'zod';
-import type { OverlayDefinition } from './types';
+import type { OverlayDefinition, CallbackSchemas, BrandedOverlay } from './types';
 
 export function defineOverlay<
   TPropsSchema extends z.ZodType<any, any>,
-  TCallbacks extends Record<string, (...args: any[]) => any>
+  TCallbackSchemas extends CallbackSchemas
 >(
-  definition: OverlayDefinition<TPropsSchema, TCallbacks>
-) {
+  definition: OverlayDefinition<TPropsSchema, TCallbackSchemas>
+): BrandedOverlay<TPropsSchema, TCallbackSchemas> {
   return {
     ...definition,
     __type: 'overlay' as const,

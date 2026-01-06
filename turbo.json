@@ -1,0 +1,13 @@
+{
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "dist/**/*.js", "dist/**/*.d.ts"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "dist/**/*.js", "dist/**/*.d.ts"]
+    }
+  }
+}

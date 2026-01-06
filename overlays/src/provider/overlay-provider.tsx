@@ -37,13 +37,11 @@ export function OverlayProvider({
 
   const open = React.useCallback((options: {
     id: string;
-    storageKey: string;
     definition: any;
     props: any;
     callbacks: any;
-    usePortal?: boolean;
   }) => {
-    const { id, storageKey, props, callbacks } = options;
+    const { id, props, callbacks } = options;
 
     const currentOverlayId = searchParams.get('overlay');
     const currentStorageKey = searchParams.get('overlay-key');
@@ -55,30 +53,25 @@ export function OverlayProvider({
       activeCallbacks.delete(currentOverlayId);
     }
 
-    OverlayStorage.set(storageKey, props);
+    OverlayStorage.set(id, props);
     activeCallbacks.set(id, callbacks);
 
     updateParams(params => {
       params.set('overlay', id);
-      params.set('overlay-key', storageKey);
     });
   }, [searchParams, updateParams, activeCallbacks]);
 
   const close = React.useCallback((id?: string) => {
     const currentOverlayId = searchParams.get('overlay');
-    const currentStorageKey = searchParams.get('overlay-key');
 
     if (!id || currentOverlayId === id) {
-      if (currentStorageKey) {
-        OverlayStorage.clear(currentStorageKey);
-      }
       if (currentOverlayId) {
+        OverlayStorage.clear(currentOverlayId);
         activeCallbacks.delete(currentOverlayId);
       }
 
       updateParams(params => {
         params.delete('overlay');
-        params.delete('overlay-key');
       });
     }
   }, [searchParams, updateParams, activeCallbacks]);
@@ -89,15 +82,13 @@ export function OverlayProvider({
 
     updateParams(params => {
       params.delete('overlay');
-      params.delete('overlay-key');
     });
   }, [updateParams, activeCallbacks]);
 
   React.useEffect(() => {
     const overlayId = searchParams.get('overlay');
-    const storageKey = searchParams.get('overlay-key');
 
-    if (!overlayId || !storageKey) {
+    if (!overlayId) {
       setActiveOverlay(null);
       return;
     }
@@ -107,15 +98,13 @@ export function OverlayProvider({
       return;
     }
 
-    const storedData = OverlayStorage.get(storageKey);
+    const storedData = OverlayStorage.get(overlayId);
 
     if (storedData) {
       setActiveOverlay({
         id: overlayId,
-        storageKey,
         definition,
         props: storedData,
-        usePortal: definition.usePortal ?? false,
       });
     } else {
       close(overlayId);
@@ -127,7 +116,6 @@ export function OverlayProvider({
       {activeOverlay.definition.render({
         props: activeOverlay.props,
         close: () => close(activeOverlay.id),
-        isOpen: true,
         callbacks: activeCallbacks.get(activeOverlay.id) || {},
       })}
     </div>
@@ -146,7 +134,7 @@ export function OverlayProvider({
     >
       {children}
       {typeof document !== 'undefined' && overlayContent && (
-        portalConfig.enabled && activeOverlay?.usePortal
+        portalConfig.enabled
           ? createPortal(
               overlayContent,
               typeof portalConfig.container === 'function'
