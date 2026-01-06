@@ -64,8 +64,8 @@ export interface BrandedOverlay<
   TPropsSchema extends z.ZodType<any, any>,
   TCallbackSchemas extends CallbackSchemas,
   TSlots extends readonly (keyof z.infer<TPropsSchema>)[] = readonly []
-> extends OverlayDefinition<TPropsSchema, TCallbackSchemas, TSlots> {
-  __type: 'overlay';
+  > extends OverlayDefinition<TPropsSchema, TCallbackSchemas, TSlots> {
+   __type: 'overlay';
   validateProps: (props: unknown) => z.infer<TPropsSchema>;
   validatePropsSafe: (props: unknown) => z.ZodSafeParseResult<z.infer<TPropsSchema>>;
 }

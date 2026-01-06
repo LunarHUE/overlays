@@ -18,11 +18,9 @@ export const EditProfile = defineOverlay({
   id: "edit-profile",
   props: z.object({
     name: z.string(),
-    email: z.string().email(),
+    email: z.email(),
     bio: z.string().optional(),
-    avatar: z.any().optional(),
   }),
-  slots: ["avatar"],
   callbacks: {
     onSave: {
       input: z.object({
@@ -54,11 +52,6 @@ export const EditProfile = defineOverlay({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {(slots.avatar ?? props.avatar) && (
-              <div className="flex justify-center">
-                {slots.avatar ?? props.avatar}
-              </div>
-            )}
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
               <Input

@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue, SelectItem } from '@/components/ui/select';
 
 export const SettingsDrawer = defineOverlay({
   id: "settings-drawer",
@@ -37,7 +39,16 @@ export const SettingsDrawer = defineOverlay({
   Component: ({ props, close, callbacks, slots }) => {
     const [notifications, setNotifications] = useState(props.notifications);
     const [darkMode, setDarkMode] = useState(props.darkMode);
-    const [language, setLanguage] = useState(props.language);
+
+    const languageOptions = [
+      { value: 'en', label: 'English' },
+      { value: 'es', label: 'Spanish' },
+      { value: 'fr', label: 'French' },
+      { value: 'de', label: 'German' },
+    ] as const;
+
+    const defaultLanguage = languageOptions.find(option => option.value === props.language);
+    const [language, setLanguage] = useState(defaultLanguage ? defaultLanguage.value : languageOptions[0].value);
 
     const handleSave = () => {
       callbacks.onSave({ notifications, darkMode, language });
@@ -47,29 +58,27 @@ export const SettingsDrawer = defineOverlay({
     return (
       <Sheet open onOpenChange={(open) => !open && close()}>
         <SheetContent>
-          <SheetHeader>
-            {(slots.header ?? props.header) && (
-              <div className="mb-4">{slots.header ?? props.header}</div>
-            )}
-            <SheetTitle>Settings</SheetTitle>
-            <SheetDescription>
-              Manage your account settings and preferences.
-            </SheetDescription>
-          </SheetHeader>
-
-          <div className="py-6 space-y-6">
+          {slots.header ? (
+              slots.header
+          ) : (
+            <SheetHeader>
+              <SheetTitle>{props.header ?? 'Settings'}</SheetTitle>
+              <SheetDescription>
+                Manage your account settings and preferences.
+              </SheetDescription>
+            </SheetHeader>
+          )}
+          <div className="py-6 space-y-6 px-4">
             <div className="space-y-4">
               <h3 className="font-medium">Notifications</h3>
               <div className="flex items-center justify-between">
                 <Label htmlFor="notifications" className="flex-1">
                   Enable notifications
                 </Label>
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="notifications"
                   checked={notifications}
-                  onChange={(e) => setNotifications(e.target.checked)}
-                  className="h-4 w-4"
+                  onCheckedChange={(checked) => setNotifications(checked)}
                 />
               </div>
             </div>
@@ -82,12 +91,10 @@ export const SettingsDrawer = defineOverlay({
                 <Label htmlFor="darkMode" className="flex-1">
                   Dark mode
                 </Label>
-                <input
-                  type="checkbox"
+                <Checkbox
                   id="darkMode"
                   checked={darkMode}
-                  onChange={(e) => setDarkMode(e.target.checked)}
-                  className="h-4 w-4"
+                  onCheckedChange={(checked) => setDarkMode(checked)}
                 />
               </div>
             </div>
@@ -96,16 +103,18 @@ export const SettingsDrawer = defineOverlay({
 
             <div className="space-y-4">
               <h3 className="font-medium">Language</h3>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="w-full p-2 border rounded-md"
-              >
-                <option value="en">English</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-              </select>
+               <Select>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue>{languageOptions.find(option => option.value === language)?.label ?? 'Select a language'}</SelectValue>
+                  </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {languageOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
