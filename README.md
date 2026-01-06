@@ -24,6 +24,10 @@ pnpm add @lunarhue/overlays zod
 yarn add @lunarhue/overlays zod
 ```
 
+```bash
+bun add @lunarhue/overlays zod
+```
+
 ## Quick Start
 
 ### 1. Set up the provider
