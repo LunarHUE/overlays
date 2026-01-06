@@ -15,7 +15,7 @@ export function OverlayProvider({
   portal = false
 }: OverlayProviderProps) {
   const registeredOverlays = React.useMemo(() => new Map(), []);
-  const [activeOverlay, setActiveOverlay] = React.useState<ActiveOverlayState | null>(null);
+  const [overlayStack, setOverlayStack] = React.useState<ActiveOverlayState[]>([]);
 
   const portalConfig = React.useMemo(() => {
     if (typeof portal === 'boolean') {
@@ -45,38 +45,57 @@ export function OverlayProvider({
   }) => {
     const { id, definition, props, callbacks, slots } = options;
 
-    setActiveOverlay({
-      id,
-      definition,
-      props,
-      callbacks,
-      slots,
-    });
+    setOverlayStack((current) => [
+      ...current,
+      {
+        id,
+        definition,
+        props,
+        callbacks,
+        slots,
+      }
+    ]);
   }, []);
 
   const close = React.useCallback((id?: string) => {
-    setActiveOverlay((current) => {
-      if (!current) return null;
-      if (id && current.id !== id) return current;
-      return null;
+    setOverlayStack((current) => {
+      if (current.length === 0) return current;
+
+      // If no id provided, close the topmost overlay (FILO)
+      if (!id) {
+        return current.slice(0, -1);
+      }
+
+      // If id provided, close that specific overlay
+      return current.filter((overlay) => overlay.id !== id);
     });
   }, []);
 
   const closeAll = React.useCallback(() => {
-    setActiveOverlay(null);
+    setOverlayStack([]);
   }, []);
 
-  const Component = activeOverlay?.definition.Component;
-
-  const overlayContent = activeOverlay && (
-    <div className={portalConfig.className} data-overlay-id={activeOverlay.id}>
-      {Component && <Component
-        props={activeOverlay.props}
-        close={() => close(activeOverlay.id)}
-        callbacks={activeOverlay.callbacks}
-        slots={activeOverlay.slots ?? {}}
-      />}
-    </div>
+  const overlayContent = overlayStack.length > 0 && (
+    <>
+      {overlayStack.map((overlay, index) => {
+        const Component = overlay.definition.Component;
+        return (
+          <div
+            key={`${overlay.id}-${index}`}
+            className={portalConfig.className}
+            data-overlay-id={overlay.id}
+            style={{ zIndex: 1000 + index }}
+          >
+            {Component && <Component
+              props={overlay.props}
+              close={() => close(overlay.id)}
+              callbacks={overlay.callbacks}
+              slots={overlay.slots ?? {}}
+            />}
+          </div>
+        );
+      })}
+    </>
   );
 
   return (

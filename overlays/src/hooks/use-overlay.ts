@@ -10,6 +10,9 @@ type MakeSlotPropsOptional<
   TSlots extends readonly (keyof TProps)[]
 > = Omit<TProps, TSlots[number]> & Partial<Pick<TProps, TSlots[number]>>;
 
+// Counter for generating unique overlay instance IDs
+let overlayInstanceCounter = 0;
+
 export function useOverlay<
   TPropsSchema extends z.ZodType<any, any>,
   TCallbackSchemas extends CallbackSchemas,
@@ -18,11 +21,11 @@ export function useOverlay<
   overlayDefinition: BrandedOverlay<TPropsSchema, TCallbackSchemas, TSlots>,
 ) {
   const { open, registerOverlay } = useOverlayContext();
-  const id = `${overlayDefinition.__type}`;
+  const definitionId = overlayDefinition.id;
 
   React.useEffect(() => {
-    registerOverlay(id, overlayDefinition as any);
-  }, [id, overlayDefinition, registerOverlay]);
+    registerOverlay(definitionId, overlayDefinition as any);
+  }, [definitionId, overlayDefinition, registerOverlay]);
 
   type Props = z.infer<TPropsSchema>;
   type SlotProps = MakeSlotPropsOptional<Props, TSlots>;
@@ -43,15 +46,18 @@ export function useOverlay<
         Object.entries(options?.callbacks ?? {}).filter(([_, v]) => v !== undefined)
       ) as Record<string, (...args: any[]) => any>;
 
+      // Generate a unique instance ID for each overlay
+      const instanceId = `${definitionId}-${++overlayInstanceCounter}`;
+
       open({
-        id,
+        id: instanceId,
         definition: overlayDefinition as any,
         props,
         callbacks,
         slots: options?.slots as Record<string, React.ReactNode> | undefined,
       });
     },
-    [overlayDefinition, open, id]
+    [overlayDefinition, open, definitionId]
   );
 
   return openOverlay;

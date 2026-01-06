@@ -6,6 +6,7 @@ Type-safe overlay management for React and Next.js with Zod schema validation.
 
 - **Type-safe**: Full TypeScript support with Zod schema validation
 - **Flexible**: Support for props, callbacks, and slots
+- **Stacking**: FILO queue system for multiple overlays
 - **Framework agnostic**: Works with React and Next.js
 - **Portal support**: Render overlays in a portal or inline
 - **Lightweight**: Minimal dependencies
@@ -209,6 +210,145 @@ const notification = defineOverlay({
   ),
 });
 ```
+
+### Stacking Overlays (FILO Queue)
+
+Overlays automatically stack on top of each other. This is especially powerful when you need to open a new overlay from within an existing overlay - a common pattern for workflows like "add new item" from a form.
+
+```tsx
+// Quick add company overlay
+const quickAddCompany = defineOverlay({
+  id: 'quick-add-company',
+  props: z.object({
+    name: z.string().optional(),
+  }),
+  callbacks: {
+    onSave: {
+      input: z.object({
+        companyId: z.string(),
+        companyName: z.string(),
+      }),
+    },
+  },
+  Component: ({ props, callbacks, close }) => {
+    const [name, setName] = useState(props.name || '');
+
+    const handleSave = () => {
+      const companyId = crypto.randomUUID();
+      callbacks.onSave({ companyId, companyName: name });
+      close();
+    };
+
+    return (
+      <Dialog open onOpenChange={open => !open && close()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Quick Add Company</DialogTitle>
+          </DialogHeader>
+          <div>
+            <Label>Company Name</Label>
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Acme Corp"
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={close} variant="outline">Cancel</Button>
+            <Button onClick={handleSave}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+});
+
+// Contact form that can open the company overlay
+const contactForm = defineOverlay({
+  id: 'contact-form',
+  props: z.object({
+    name: z.string().optional(),
+    email: z.string().optional(),
+  }),
+  callbacks: {
+    onSubmit: {
+      input: z.object({
+        name: z.string(),
+        email: z.string(),
+        companyId: z.string().optional(),
+      }),
+    },
+  },
+  Component: ({ props, callbacks, close }) => {
+    const [name, setName] = useState(props.name || '');
+    const [email, setEmail] = useState(props.email || '');
+    const [companyId, setCompanyId] = useState<string>();
+
+    // Open another overlay from within this overlay!
+    const openQuickAdd = useOverlay(quickAddCompany);
+
+    const handleQuickAddCompany = () => {
+      openQuickAdd({
+        props: {},
+        callbacks: {
+          onSave: ({ companyId, companyName }) => {
+            setCompanyId(companyId);
+            console.log('Added company:', companyName);
+            // The quick add overlay closes, revealing this form again
+          },
+        },
+      });
+    };
+
+    return (
+      <Dialog open onOpenChange={open => !open && close()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Contact</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="flex gap-2">
+              <Select value={companyId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Select company" />
+                </SelectTrigger>
+              </Select>
+              {/* Opens a new overlay on top of this one */}
+              <Button onClick={handleQuickAddCompany} size="icon">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={close} variant="outline">Cancel</Button>
+            <Button onClick={() => {
+              callbacks.onSubmit({ name, email, companyId });
+              close();
+            }}>
+              Save Contact
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  },
+});
+```
+
+**Key behaviors:**
+- `useOverlay` can be called from within an overlay component
+- New overlays stack on top with automatic z-index management
+- Closing the top overlay reveals the one underneath
+- Perfect for "quick add" or "select or create" workflows
+- Each overlay instance gets a unique ID (e.g., `contact-form-1`, `quick-add-company-2`)
 
 ### Portal Configuration
 

@@ -4,16 +4,18 @@ import { useOverlay } from "@lunarhue/overlays";
 import { ConfirmDelete } from "../overlays/confirm-delete";
 import { EditProfile } from "../overlays/edit-profile";
 import { SettingsDrawer } from "../overlays/settings-drawer";
+import { ContactForm } from "../overlays/contact-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Trash2 } from "lucide-react";
+import { Trash2, UserPlus } from "lucide-react";
 import { SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 
 export default function Page() {
   const openConfirmDelete = useOverlay(ConfirmDelete);
   const openEditProfile = useOverlay(EditProfile);
   const openSettings = useOverlay(SettingsDrawer);
+  const openContactForm = useOverlay(ContactForm);
 
 
 
@@ -87,10 +89,10 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen">
       <div className="container max-w-6xl mx-auto p-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-2">
             Overlay Examples
           </h1>
           <p className="text-muted-foreground">
@@ -111,14 +113,6 @@ export default function Page() {
               <Button onClick={handleDelete} variant="destructive" className="w-full">
                 Delete Item
               </Button>
-              <div className="mt-4 text-xs text-muted-foreground">
-                <p className="font-semibold mb-1">Features:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Custom SVG icon via slot</li>
-                  <li>onConfirm callback with ID parameter</li>
-                  <li>onCancel callback</li>
-                </ul>
-              </div>
             </CardContent>
           </Card>
 
@@ -134,14 +128,6 @@ export default function Page() {
               <Button onClick={handleEditProfile} className="w-full">
                 Edit Profile
               </Button>
-              <div className="mt-4 text-xs text-muted-foreground">
-                <p className="font-semibold mb-1">Features:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Avatar slot for custom rendering</li>
-                  <li>Form inputs with validation</li>
-                  <li>onSave callback with form data</li>
-                </ul>
-              </div>
             </CardContent>
           </Card>
 
@@ -157,19 +143,42 @@ export default function Page() {
               <Button onClick={handleOpenSettings} variant="outline" className="w-full">
                 Open Settings
               </Button>
-              <div className="mt-4 text-xs text-muted-foreground">
-                <p className="font-semibold mb-1">Features:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Custom header slot</li>
-                  <li>Multiple settings sections</li>
-                  <li>onSave callback with all settings</li>
-                </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CardTitle>Nested Overlays (FILO Stack)</CardTitle>
               </div>
+              <CardDescription>
+                Open a new overlay from within an existing overlay. Perfect for
+                "quick add" workflows where you need to create a related item.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() =>
+                  openContactForm({
+                    props: {},
+                    callbacks: {
+                      onSubmit: (data) => {
+                        console.log("Contact saved:", data);
+                      },
+                      onCancel: () => {
+                        console.log("Contact form cancelled");
+                      },
+                    },
+                  })
+                }
+                className="w-full"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Add New Contact
+              </Button>
             </CardContent>
           </Card>
         </div>
-
-        <Separator className="my-8" />
       </div>
     </div>
   );
