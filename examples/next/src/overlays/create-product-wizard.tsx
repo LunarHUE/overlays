@@ -16,38 +16,42 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
 
-function CreateProductWizardContent({
-  props,
-  close,
-  callbacks,
-  slots,
-}: {
-  props: {
-    categoryId?: string;
-    initialStep: number;
-    headerIcon?: any;
-    imagePreview?: any;
-    customFooter?: any;
-  };
-  close: () => void;
+export const CreateProductWizard = defineOverlay({
+  id: "create-product-wizard",
+  props: z.object({
+    categoryId: z.string().optional(),
+    initialStep: z.number().default(1),
+    headerIcon: z.any().optional(),
+    imagePreview: z.any().optional(),
+    customFooter: z.any().optional(),
+  }),
+  slots: ["headerIcon", "imagePreview", "customFooter"],
   callbacks: {
-    onCreate: (data: {
-      name: string;
-      description: string;
-      price: number;
-      category: string;
-      tags: string[];
-    }) => void;
-    onStepChange: (data: { from: number; to: number }) => void;
-    onCancel: () => void;
-    onValidationError: (data: { step: number; errors: string[] }) => void;
-  };
-  slots: {
-    headerIcon?: React.ReactNode;
-    imagePreview?: React.ReactNode;
-    customFooter?: React.ReactNode;
-  };
-}) {
+    onCreate: {
+      input: z.object({
+        name: z.string(),
+        description: z.string(),
+        price: z.number(),
+        category: z.string(),
+        tags: z.array(z.string()),
+      }),
+    },
+    onStepChange: {
+      input: z.object({
+        from: z.number(),
+        to: z.number(),
+      }),
+    },
+    onCancel: {},
+    onValidationError: {
+      input: z.object({
+        step: z.number(),
+        errors: z.array(z.string()),
+      }),
+    },
+  },
+
+  Component: ({ props, close, callbacks, slots }) => {
     const [currentStep, setCurrentStep] = useState(props.initialStep);
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
@@ -295,42 +299,5 @@ function CreateProductWizardContent({
         </DialogContent>
       </Dialog>
     );
-}
-
-export const CreateProductWizard = defineOverlay({
-  id: "create-product-wizard",
-  props: z.object({
-    categoryId: z.string().optional(),
-    initialStep: z.number().default(1),
-    headerIcon: z.any().optional(),
-    imagePreview: z.any().optional(),
-    customFooter: z.any().optional(),
-  }),
-  slots: ["headerIcon", "imagePreview", "customFooter"] as const,
-  callbacks: {
-    onCreate: {
-      input: z.object({
-        name: z.string(),
-        description: z.string(),
-        price: z.number(),
-        category: z.string(),
-        tags: z.array(z.string()),
-      }),
-    },
-    onStepChange: {
-      input: z.object({
-        from: z.number(),
-        to: z.number(),
-      }),
-    },
-    onCancel: {},
-    onValidationError: {
-      input: z.object({
-        step: z.number(),
-        errors: z.array(z.string()),
-      }),
-    },
   },
-
-  render: (params) => <CreateProductWizardContent {...params} />,
 });

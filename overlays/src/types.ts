@@ -32,6 +32,19 @@ type GenericOverlayProps = any
 type GenericCallbackSchemas = Record<string, CallbackSchema>;
 type GenericOverlayDefinition = OverlayDefinition<GenericOverlayProps, GenericCallbackSchemas>;
 
+export type OverlayComponentProps<
+  TPropsSchema extends z.ZodType<any, any>,
+  TCallbackSchemas extends CallbackSchemas,
+  TSlots extends readonly (keyof z.infer<TPropsSchema>)[]
+> = {
+  props: z.infer<TPropsSchema>;
+  close: () => void;
+  callbacks: InferCallbacks<TCallbackSchemas>;
+  slots: {
+    [K in TSlots[number]]?: React.ReactNode;
+  };
+};
+
 export interface OverlayDefinition<
   TPropsSchema extends z.ZodType<any, any>,
   TCallbackSchemas extends CallbackSchemas,
@@ -42,14 +55,9 @@ export interface OverlayDefinition<
   callbacks?: TCallbackSchemas;
   slots?: TSlots;
   defaultProps?: Partial<z.infer<TPropsSchema>>;
-  render: (params: {
-    props: z.infer<TPropsSchema>;
-    close: () => void;
-    callbacks: InferCallbacks<TCallbackSchemas>;
-    slots: {
-      [K in TSlots[number]]?: React.ReactNode;
-    };
-  }) => React.ReactElement;
+  Component: React.ComponentType<
+    OverlayComponentProps<TPropsSchema, TCallbackSchemas, TSlots>
+  >;
 }
 
 export interface BrandedOverlay<
@@ -61,6 +69,22 @@ export interface BrandedOverlay<
   validateProps: (props: unknown) => z.infer<TPropsSchema>;
   validatePropsSafe: (props: unknown) => z.ZodSafeParseResult<z.infer<TPropsSchema>>;
 }
+
+// Helper type to extract render params from an overlay definition
+export type RenderParams<T extends BrandedOverlay<any, any, any>> = T extends BrandedOverlay<
+  infer TPropsSchema,
+  infer TCallbackSchemas,
+  infer TSlots
+>
+  ? {
+      props: z.infer<TPropsSchema>;
+      close: () => void;
+      callbacks: InferCallbacks<TCallbackSchemas>;
+      slots: {
+        [K in TSlots[number]]?: React.ReactNode;
+      };
+    }
+  : never;
 
 export interface OverlayProviderProps {
   children: React.ReactNode;

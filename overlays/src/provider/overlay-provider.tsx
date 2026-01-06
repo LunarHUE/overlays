@@ -66,14 +66,16 @@ export function OverlayProvider({
     setActiveOverlay(null);
   }, []);
 
+  const Component = activeOverlay?.definition.Component;
+
   const overlayContent = activeOverlay && (
     <div className={portalConfig.className} data-overlay-id={activeOverlay.id}>
-      {activeOverlay.definition.render({
-        props: activeOverlay.props,
-        close: () => close(activeOverlay.id),
-        callbacks: activeOverlay.callbacks,
-        slots: activeOverlay.slots ?? {},
-      })}
+      {Component && <Component
+        props={activeOverlay.props}
+        close={() => close(activeOverlay.id)}
+        callbacks={activeOverlay.callbacks}
+        slots={activeOverlay.slots ?? {}}
+      />}
     </div>
   );
 

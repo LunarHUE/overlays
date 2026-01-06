@@ -30,7 +30,7 @@ export const ConfirmDelete = defineOverlay({
     onCancel: {},
   },
 
-  render: ({ props, close, callbacks, slots }) => {
+  Component: ({ props, close, callbacks, slots }): React.ReactNode => {
     return (
       <AlertDialog open onOpenChange={(open) => !open && close()}>
         <AlertDialogContent>

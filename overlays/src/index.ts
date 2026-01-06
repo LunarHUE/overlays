@@ -8,5 +8,8 @@ export type {
   OverlayProviderProps,
   CallbackSchema,
   CallbackSchemas,
+  InferCallback,
   InferCallbacks,
+  BrandedOverlay,
+  RenderParams,
 } from './types';
