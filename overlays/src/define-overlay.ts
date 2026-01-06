@@ -3,10 +3,11 @@ import type { OverlayDefinition, CallbackSchemas, BrandedOverlay } from './types
 
 export function defineOverlay<
   TPropsSchema extends z.ZodType<any, any>,
-  TCallbackSchemas extends CallbackSchemas
+  TCallbackSchemas extends CallbackSchemas,
+  TSlots extends readonly (keyof z.infer<TPropsSchema>)[] = readonly []
 >(
-  definition: OverlayDefinition<TPropsSchema, TCallbackSchemas>
-): BrandedOverlay<TPropsSchema, TCallbackSchemas> {
+  definition: OverlayDefinition<TPropsSchema, TCallbackSchemas, TSlots>
+): BrandedOverlay<TPropsSchema, TCallbackSchemas, TSlots> {
   return {
     ...definition,
     __type: 'overlay' as const,

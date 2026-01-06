@@ -7,6 +7,7 @@ import type { OverlayProviderProps, ActiveOverlay } from '../types';
 
 interface ActiveOverlayState extends ActiveOverlay {
   callbacks: Record<string, (...args: any[]) => any>;
+  slots?: Record<string, React.ReactNode>;
 }
 
 export function OverlayProvider({
@@ -40,14 +41,16 @@ export function OverlayProvider({
     definition: any;
     props: any;
     callbacks: any;
+    slots?: Record<string, React.ReactNode>;
   }) => {
-    const { id, definition, props, callbacks } = options;
+    const { id, definition, props, callbacks, slots } = options;
 
     setActiveOverlay({
       id,
       definition,
       props,
       callbacks,
+      slots,
     });
   }, []);
 
@@ -69,6 +72,7 @@ export function OverlayProvider({
         props: activeOverlay.props,
         close: () => close(activeOverlay.id),
         callbacks: activeOverlay.callbacks,
+        slots: activeOverlay.slots ?? {},
       })}
     </div>
   );

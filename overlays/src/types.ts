@@ -34,23 +34,29 @@ type GenericOverlayDefinition = OverlayDefinition<GenericOverlayProps, GenericCa
 
 export interface OverlayDefinition<
   TPropsSchema extends z.ZodType<any, any>,
-  TCallbackSchemas extends CallbackSchemas
+  TCallbackSchemas extends CallbackSchemas,
+  TSlots extends readonly (keyof z.infer<TPropsSchema>)[] = readonly []
   > {
   id: string;
   props: TPropsSchema;
   callbacks?: TCallbackSchemas;
+  slots?: TSlots;
   defaultProps?: Partial<z.infer<TPropsSchema>>;
   render: (params: {
     props: z.infer<TPropsSchema>;
     close: () => void;
     callbacks: InferCallbacks<TCallbackSchemas>;
+    slots: {
+      [K in TSlots[number]]?: React.ReactNode;
+    };
   }) => React.ReactElement;
 }
 
 export interface BrandedOverlay<
   TPropsSchema extends z.ZodType<any, any>,
-  TCallbackSchemas extends CallbackSchemas
-> extends OverlayDefinition<TPropsSchema, TCallbackSchemas> {
+  TCallbackSchemas extends CallbackSchemas,
+  TSlots extends readonly (keyof z.infer<TPropsSchema>)[] = readonly []
+> extends OverlayDefinition<TPropsSchema, TCallbackSchemas, TSlots> {
   __type: 'overlay';
   validateProps: (props: unknown) => z.infer<TPropsSchema>;
   validatePropsSafe: (props: unknown) => z.ZodSafeParseResult<z.infer<TPropsSchema>>;
@@ -69,6 +75,7 @@ export interface ActiveOverlay {
   id: string;
   definition: GenericOverlayDefinition;
   props: GenericOverlayProps;
+  slots?: Record<string, React.ReactNode>;
 }
 
 export interface OverlayContextValue {
@@ -77,6 +84,7 @@ export interface OverlayContextValue {
     definition: GenericOverlayDefinition;
     props: GenericOverlayProps;
     callbacks: Record<string, (...args: any[]) => any>;
+    slots?: Record<string, React.ReactNode>;
   }) => void;
   close: (id?: string) => void;
   closeAll: () => void;
