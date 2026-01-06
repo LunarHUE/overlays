@@ -24,6 +24,7 @@ jobs:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - run: cd overlays
+      - run: ls -la # where am i
       - run: npm install
       - run: npm run build
       - run: npm publish
