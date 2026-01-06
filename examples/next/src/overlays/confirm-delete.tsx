@@ -34,11 +34,11 @@ export const ConfirmDelete = defineOverlay({
             <AlertDialogTitle>
               {props.title ?? "Are you absolutely sure?"}
             </AlertDialogTitle>
-            <AlertDialogDescription>
-              {props.description ??
-                `This action cannot be undone. This will permanently delete item ${props.id}.`}
-            </AlertDialogDescription>
           </AlertDialogHeader>
+          <AlertDialogDescription>
+            {props.description ??
+              `This action cannot be undone.`}
+          </AlertDialogDescription>
           <AlertDialogFooter>
             <AlertDialogCancel
               onClick={() => {

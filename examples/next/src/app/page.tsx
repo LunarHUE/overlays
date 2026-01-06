@@ -2,6 +2,7 @@
 
 import { useOverlay } from "@lunarhue/overlays";
 import { ConfirmDelete } from "../overlays/confirm-delete";
+import { Button } from "@/components/ui/button";
 
 export default function Page() {
   const openConfirmDelete = useOverlay(ConfirmDelete);
@@ -10,6 +11,8 @@ export default function Page() {
     openConfirmDelete({
       props: {
         id: "item-123",
+        // title: "Delete Item",
+        // description: "Are you sure you want to delete this item? This action cannot be undone.",
       },
       callbacks: {
         onConfirm: ({ id }) => {
@@ -25,12 +28,9 @@ export default function Page() {
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-4">Overlay Example</h1>
-      <button
-        onClick={handleDelete}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-      >
+      <Button onClick={handleDelete} variant="destructive">
         Delete Item
-      </button>
+      </Button>
     </div>
   );
 }

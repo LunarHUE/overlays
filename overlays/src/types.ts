@@ -82,5 +82,4 @@ export interface OverlayContextValue {
   closeAll: () => void;
   registeredOverlays: Map<string, GenericOverlayDefinition>;
   registerOverlay: (id: string, definition: GenericOverlayDefinition) => void;
-  activeCallbacks: Map<string, Record<string, (...args: any[]) => any>>;
 }
